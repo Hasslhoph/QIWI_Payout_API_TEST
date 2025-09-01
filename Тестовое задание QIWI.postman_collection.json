@@ -1,0 +1,317 @@
+{
+	"info": {
+		"_postman_id": "ec078de5-c802-48a6-a9c8-2934afd3db57",
+		"name": "Тестовое задание QIWI",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "47213628"
+	},
+	"item": [
+		{
+			"name": "Получить список платежей(проверка доступности сервиса)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Статус ответа 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Ответ имеет правильную структуру\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData).to.have.property('data');\r",
+							"    pm.expect(jsonData.data).to.be.an('array');\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Проверяем в хедерах Content-Type application/json\", function () {\r",
+							"    pm.response.to.have.header(\"Content-Type\", \"application/json\");\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text"
+					},
+					{
+						"key": "Host",
+						"value": "api-test.qiwi.com",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{payout.api.url}}/v1/agents/{{agentid}}}}/points/{{pointid}}/payments",
+					"host": [
+						"{{payout.api.url}}"
+					],
+					"path": [
+						"v1",
+						"agents",
+						"{{agentid}}}}",
+						"points",
+						"{{pointid}}",
+						"payments"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Запросить баланс",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Статус ответа 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Баланс больше 0\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData).to.have.property('accounts');\r",
+							"    pm.expect(jsonData.accounts).to.be.an('array');\r",
+							"    \r",
+							"    var balance = 0;\r",
+							"    jsonData.accounts.forEach(function(account) {\r",
+							"        if (account.alias === 'qw_wallet_rub') {\r",
+							"            balance = account.balance.amount;\r",
+							"        }\r",
+							"    });\r",
+							"    \r",
+							"    pm.expect(parseFloat(balance)).to.be.above(0, \"Баланс должен быть больше 0\");\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer{{token}}",
+						"type": "text"
+					},
+					{
+						"key": "Host",
+						"value": "api-test.qiwi.com",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "GET {{payout.api.url}}/v1/agents/{{agentid}}/points/{{pointid}}/balance",
+					"host": [
+						"GET {{payout.api.url}}"
+					],
+					"path": [
+						"v1",
+						"agents",
+						"{{agentid}}",
+						"points",
+						"{{pointid}}",
+						"balance"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Создание платежа на 1 рубль",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Статус ответа 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Сохраняем ID транзакции\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData).to.have.property('id');\r",
+							"    pm.collectionVariables.set(\"transactionId\", jsonData.id);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "\r\n{\r\n  \"recipientDetails\": {\r\n    \"providerCode\": \"MTS\",\r\n    \"fields\": {\r\n      \"account\": \"79123456789\"\r\n    }\r\n  },\r\n  \"amount\": {\r\n    \"value\": \"1.00\",\r\n    \"currency\": \"RUB\"\r\n  },\r\n  \"customer\": {\r\n    \"account\": \"#12345\",\r\n    \"email\": \"usermail@mail.mail\",\r\n    \"phone\": \"9123456789\"\r\n  },\r\n  \"source\": {\r\n    \"paymentType\": \"WITH_EXTRA_CHARGE\",\r\n    \"paymentToolType\": \"CASH\",\r\n    \"paymentTerminalType\": \"ATM_CASH_IN\",\r\n    \"paymentDate\": \"2018-11-27T14:02:35.589+03:00\",\r\n    \"extraCharge\": {\r\n      \"value\": \"1.00\",\r\n      \"currency\": \"RUB\"\r\n    }\r\n  },\r\n  \"callbackUrl\": \"https://domain/path\",\r\n  \"IdentificationType\": \"NONE\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{payout.api.url}}/v1/agents/{{agentid}}/points/{{pointid}}/payments/{{paymentId}}",
+					"host": [
+						"{{payout.api.url}}"
+					],
+					"path": [
+						"v1",
+						"agents",
+						"{{agentid}}",
+						"points",
+						"{{pointid}}",
+						"payments",
+						"{{paymentId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Проверить платеж",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Статус ответа 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Статус платежа валиден\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData).to.have.property('status');\r",
+							"    var validStatuses = ['WAITING', 'PROCESSING', 'SUCCESS', 'ERROR', 'REJECTED'];\r",
+							"    pm.expect(validStatuses).to.include(jsonData.status);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer{{token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{payout.api.url}}/v1/agents/{{agentid}}/points/{{pointid}}/payments/{{paymentId}}",
+					"host": [
+						"{{payout.api.url}}"
+					],
+					"path": [
+						"v1",
+						"agents",
+						"{{agentid}}",
+						"points",
+						"{{pointid}}",
+						"payments",
+						"{{paymentId}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "payout.api.url",
+			"value": "https://api-test.qiwi.com/partner/payout"
+		},
+		{
+			"key": "token",
+			"value": "test_qiwi_token_example"
+		},
+		{
+			"key": "walletId",
+			"value": "111111"
+		},
+		{
+			"key": "TransactionId",
+			"value": ""
+		},
+		{
+			"key": "agentid",
+			"value": "acme"
+		},
+		{
+			"key": "pointid",
+			"value": "72364"
+		},
+		{
+			"key": "paymentId",
+			"value": "1"
+		}
+	]
+}
