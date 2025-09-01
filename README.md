@@ -15,6 +15,16 @@ https://developer.qiwi.com/ru/payout/v1/#about
 1. коллекция Postman
 2. код playwright
 
+Загрузите коллекцию в Postman с помощью функции Import.
+Структура:
+(Коллекция) Тестовое задание QIWI/
+ - GET Получить список платежей
+ - GET Запросить баланс
+ - POST Создать платеж на 1 рубль
+ - GET Проверить платеж
+
+Код playwright можно увидеть на вкладе Scripts/Post-response
+
 Для тестового задания используются MOCK данные Variables.
 Замените mock-данные на реальные:
 
